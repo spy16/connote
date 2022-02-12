@@ -2,6 +2,11 @@
 
 connote is a simple console-based note taking tool.
 
+## Install
+
+* Download the binary for your operating system from [Releases](./releases)
+* Run `go install github.com/spy16/connote` to directly build and install.
+
 ## Usage
 
 ```shell
