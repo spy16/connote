@@ -1,4 +1,4 @@
-# connote
+# 📝 connote
 
 connote is a simple console-based note taking tool.
 
