@@ -17,7 +17,7 @@ $ connote write
 $ connote note @yday
 
 # create a custom note with tags 
-$ connote note kafka -t type:tldr
+$ connote note kafka -t tldr
 
 # show today's note
 $ connote show
@@ -32,6 +32,6 @@ $ connote show kafka
 $ connote list
 
 # list all tldr type notes
-$ connote list -t type:tldr
+$ connote list -t tldr
 ```
 
