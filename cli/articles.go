@@ -191,9 +191,9 @@ func cmdListArticles(ctx context.Context) *cobra.Command {
 		if useJSON {
 			jsonOut(articlesList)
 		} else if tableView {
-			data := make([][]string, len(articlesList), len(articlesList))
-			for i, ar := range articlesList {
-				data[i] = []string{fmt.Sprintf("%d", ar.ID), ar.Name, strings.Join(ar.Tags, ",")}
+			data := make([][]string, len(articlesList))
+			for _, ar := range articlesList {
+				data = append(data, []string{fmt.Sprintf("%d", ar.ID), ar.Name, strings.Join(ar.Tags, ",")})
 			}
 
 			table := tablewriter.NewWriter(os.Stdout)
