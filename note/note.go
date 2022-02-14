@@ -50,28 +50,24 @@ func Parse(md []byte) (*Note, error) {
 	return &ar, nil
 }
 
-// Meta represents information about the note.
-type Meta struct {
-}
-
 // Note represents a snippet of information with additional metadata.
 type Note struct {
 	Name      string    `json:"name" yaml:"name"`
 	Tags      []string  `json:"tags" yaml:"tags,omitempty"`
+	Content   string    `json:"content" yaml:"content,omitempty"`
 	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" yaml:"updated_at"`
-	Content   string    `json:"content" yaml:"content,omitempty"`
 }
 
-func (ar *Note) Validate() error {
-	ar.Name = strings.TrimSpace(ar.Name)
-	if ar.CreatedAt.IsZero() {
-		ar.CreatedAt = time.Now()
-		ar.UpdatedAt = ar.CreatedAt
+func (nt *Note) Validate() error {
+	nt.Name = strings.TrimSpace(nt.Name)
+	if nt.CreatedAt.IsZero() {
+		nt.CreatedAt = time.Now()
+		nt.UpdatedAt = nt.CreatedAt
 	}
 
 	tagSet := map[string]string{}
-	for _, tag := range ar.Tags {
+	for _, tag := range nt.Tags {
 		tag = strings.TrimSpace(tag)
 		if tag != "" {
 			k, v := splitTag(tag)
@@ -79,34 +75,43 @@ func (ar *Note) Validate() error {
 		}
 	}
 
-	ar.Tags = nil
+	nt.Tags = nil
 	for k, v := range tagSet {
 		if v == "" {
-			ar.Tags = append(ar.Tags, k)
+			nt.Tags = append(nt.Tags, k)
 		} else {
-			ar.Tags = append(ar.Tags, fmt.Sprintf("%s:%s", k, v))
+			nt.Tags = append(nt.Tags, fmt.Sprintf("%s:%s", k, v))
 		}
 	}
 
-	if !nameExp.MatchString(ar.Name) {
-		return fmt.Errorf("invalid name: '%s'", ar.Name)
+	if !nameExp.MatchString(nt.Name) {
+		return fmt.Errorf("invalid name: '%s'", nt.Name)
 	}
 	return nil
 }
 
 // ToMarkdown returns article in mark-down format. name, attribs, etc.
 // are added as front-matter.
-func (ar *Note) ToMarkdown() []byte {
-	content := ar.Content
-	ar.Content = ""
+func (nt *Note) ToMarkdown() []byte {
+	content := nt.Content
+	nt.Content = ""
 
 	var buf bytes.Buffer
 	buf.WriteString("---\n")
-	if err := yaml.NewEncoder(&buf).Encode(ar); err != nil {
+	if err := yaml.NewEncoder(&buf).Encode(nt); err != nil {
 		panic(fmt.Errorf("failed to encode yaml: %v", err))
 	}
 	buf.WriteString("---\n\n")
 	buf.WriteString(content)
 
 	return buf.Bytes()
+}
+
+func (nt *Note) FromMD(d []byte) error {
+	n, err := Parse(d)
+	if err != nil {
+		return err
+	}
+	*nt = *n
+	return nil
 }

@@ -1,31 +1,30 @@
 package cli
 
 import (
+	"bytes"
 	"context"
-	"database/sql"
-	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 
-	"github.com/spy16/connote/article"
+	"github.com/spy16/connote/note"
 )
 
 var (
-	useJSON  bool
-	articles *article.API
-
 	root = &cobra.Command{
-		Use:   "connote <command> [flags]",
-		Short: "Console based note taking tool.",
+		Use:               "connote <command> [flags]",
+		Short:             "📝 Console based note taking tool.",
+		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 	}
 )
 
@@ -35,7 +34,7 @@ func Execute(ctx context.Context, version string) {
 	flags := root.PersistentFlags()
 	flags.StringVarP(&profile, "profile", "p", "work", "Profile to load and use")
 	flags.StringVarP(&logLevel, "log-level", "l", "warn", "Log level to use")
-	flags.BoolVarP(&useJSON, "json", "j", false, "Use JSON output instead of pretty")
+	flags.StringP("output", "o", "pretty", "Output format (json, yaml, markdown & pretty)")
 
 	root.Version = version
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
@@ -53,15 +52,9 @@ func Execute(ctx context.Context, version string) {
 		if err := os.MkdirAll(configDir, os.ModePerm); err != nil {
 			return err
 		}
-		profileDB := filepath.Join(configDir, profile+".db")
-		logrus.Infof("using profile db '%s'", profileDB)
+		notesDir := filepath.Join(configDir, profile)
 
-		db, err := sql.Open("sqlite3", profileDB)
-		if err != nil {
-			return err
-		}
-
-		articles, err = article.New(db)
+		notes, err = note.Open(notesDir, nil)
 		if err != nil {
 			return err
 		}
@@ -70,29 +63,26 @@ func Execute(ctx context.Context, version string) {
 
 	// setup all commands
 	root.AddCommand(
-		cmdEditArticle(ctx),
-		cmdListArticles(ctx),
-		cmdShowArticle(ctx),
-		cmdDeleteArticle(ctx),
-		cmdLoadFrom(ctx),
+		cmdShowNote(ctx),
+		cmdReindex(ctx),
+		cmdEditNote(ctx),
+		cmdSearch(ctx),
+		cmdLoadNotes(ctx),
+		cmdRemoveNote(ctx),
 	)
 
 	_ = root.Execute()
 }
 
-func jsonOut(v interface{}) {
-	_ = json.NewEncoder(os.Stdout).Encode(v)
-}
-
-func externalEditor(d []byte) (string, error) {
+func externalEditor(d []byte) ([]byte, error) {
 	f, err := os.CreateTemp(os.TempDir(), "wt-article*.md")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer f.Close()
 
 	if _, err := f.Write(d); err != nil {
-		return "", err
+		return nil, err
 	}
 	_ = f.Sync()
 
@@ -101,20 +91,44 @@ func externalEditor(d []byte) (string, error) {
 		editor = "vi"
 	}
 
-	cmd := exec.Command(editor, f.Name())
+	editorPath, err := exec.LookPath(editor)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := exec.Command(editorPath, f.Name())
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err = cmd.Start(); err != nil {
-		return "", err
-	}
-	err = cmd.Wait()
-	if err != nil {
-		return "", err
+	if err = cmd.Run(); err != nil {
+		return nil, err
 	}
 
 	_, _ = f.Seek(0, 0)
-	buf, err := ioutil.ReadAll(f)
-	return string(buf), err
+	return ioutil.ReadAll(f)
+}
+
+func fzfSearch(items []string) (string, error) {
+	p, err := exec.LookPath("fzf")
+	if err != nil {
+		return "", errors.New("fzf not found")
+	}
+
+	cmd := exec.Command(p)
+	cmd.Stdin = strings.NewReader(strings.Join(items, "\n"))
+	cmd.Stderr = os.Stderr
+
+	buf := bytes.Buffer{}
+	cmd.Stdout = &buf
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+
+	sel := strings.TrimSpace(buf.String())
+	return sel, nil
+}
+
+func makeDayID(t time.Time) string {
+	return fmt.Sprintf("day:%d-%s-%d", t.Day(), t.Month().String()[0:3], t.Year())
 }
