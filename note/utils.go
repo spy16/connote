@@ -7,6 +7,9 @@ import (
 	"time"
 )
 
+// LogFn is responsible for showing logs.
+type LogFn func(lvl, format string, args ...interface{})
+
 // ParseTime parses the given time-specification and returns.
 // ds can be 'today', 'yesterday', 'tomorrow', an int value
 // representing offset in days (-1 for yesterday, +1 for tomorrow etc.) or a date
@@ -41,4 +44,21 @@ func ParseTime(ds string) (time.Time, error) {
 	}
 
 	return t, nil
+}
+
+func splitTag(tag string) (k, v string) {
+	pair := strings.SplitN(tag, ":", 2)
+	key := pair[0]
+	if len(pair) == 1 {
+		return key, ""
+	}
+	return key, pair[1]
+}
+
+func arrToSet(arr []string) map[string]struct{} {
+	m := map[string]struct{}{}
+	for _, s := range arr {
+		m[s] = struct{}{}
+	}
+	return m
 }

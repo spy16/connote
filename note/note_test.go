@@ -18,12 +18,11 @@ func TestParse(t *testing.T) {
 			name: "ValidWithFrontMatter",
 			md:   validWithFrontMatter,
 			want: &Note{
-				ID:        3,
 				Name:      "foo",
 				Tags:      []string{"test", "foo"},
-				Content:   "# Foo\n\nSome notes",
 				CreatedAt: sampleCreatedAt,
 				UpdatedAt: sampleUpdatedAt,
+				Content:   "# Foo\n\nSome notes",
 			},
 		},
 		{

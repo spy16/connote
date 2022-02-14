@@ -13,7 +13,6 @@ import (
 
 var (
 	hrExp   = regexp.MustCompile("^-{3}-*$")
-	idExp   = regexp.MustCompile("^[0-9]+$")
 	nameExp = regexp.MustCompile("^[A-Za-z][A-Za-z0-9-_/:]+$")
 )
 
@@ -51,15 +50,17 @@ func Parse(md []byte) (*Note, error) {
 	return &ar, nil
 }
 
+// Meta represents information about the note.
+type Meta struct {
+}
+
 // Note represents a snippet of information with additional metadata.
 type Note struct {
-	ID        int       `json:"id" yaml:"id"`
 	Name      string    `json:"name" yaml:"name"`
 	Tags      []string  `json:"tags" yaml:"tags,omitempty"`
 	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" yaml:"updated_at"`
-
-	Content string `json:"content" yaml:"content,omitempty"`
+	Content   string    `json:"content" yaml:"content,omitempty"`
 }
 
 func (ar *Note) Validate() error {
@@ -108,17 +109,4 @@ func (ar *Note) ToMarkdown() []byte {
 	buf.WriteString(content)
 
 	return buf.Bytes()
-}
-
-func (ar Note) IsMatch(q Query) bool {
-	return false
-}
-
-func splitTag(tag string) (k, v string) {
-	pair := strings.SplitN(tag, ":", 2)
-	key := pair[0]
-	if len(pair) == 1 {
-		return key, ""
-	}
-	return key, pair[1]
 }
