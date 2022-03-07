@@ -109,7 +109,12 @@ func externalEditor(d []byte) ([]byte, error) {
 	return ioutil.ReadAll(f)
 }
 
-func fzfSearch(items []string) (string, error) {
+func fzfSearch(notes []note.Note) (string, error) {
+	items := make([]string, len(notes), len(notes))
+	for i := range notes {
+		items[i] = notes[i].Name
+	}
+
 	p, err := exec.LookPath("fzf")
 	if err != nil {
 		return "", errors.New("fzf not found")

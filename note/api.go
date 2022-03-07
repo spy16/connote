@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -46,7 +47,7 @@ type API struct {
 }
 
 // Search finds names of all notes that match the given query.
-func (api *API) Search(q Query) ([]string, error) {
+func (api *API) Search(q Query, loadNote bool) ([]Note, error) {
 	var nameRE *regexp.Regexp
 	q.NameLike = strings.TrimSpace(q.NameLike)
 	if q.NameLike != "" {
@@ -57,7 +58,7 @@ func (api *API) Search(q Query) ([]string, error) {
 		nameRE = np
 	}
 
-	var res []string
+	var res []Note
 	for name, node := range api.idx {
 		if nameRE != nil && !nameRE.MatchString(name) {
 			continue
@@ -65,7 +66,21 @@ func (api *API) Search(q Query) ([]string, error) {
 			continue
 		}
 
-		res = append(res, name)
+		if loadNote {
+			n, err := api.Get(name)
+			if err != nil {
+				return nil, err
+			}
+			res = append(res, *n)
+		} else {
+			res = append(res, Note{Name: name})
+		}
+	}
+
+	if loadNote {
+		sort.Slice(res, func(i, j int) bool {
+			return res[i].CreatedAt.After(res[j].CreatedAt)
+		})
 	}
 	return res, nil
 }

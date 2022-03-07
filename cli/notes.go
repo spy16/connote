@@ -14,6 +14,7 @@ import (
 
 	"github.com/charmbracelet/glamour"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -87,14 +88,14 @@ func cmdShowNote(ctx context.Context) *cobra.Command {
 
 	var wrap int
 	var style string
-	var fzf bool
+	var fzf, loadNote bool
 	cmd.Flags().BoolVar(&fzf, "fzf", false, "Select from fzf")
 	cmd.Flags().StringVarP(&style, "style", "s", "dracula", "Output style for markdown")
 	cmd.Flags().IntVarP(&wrap, "wrap", "w", 100, "Word wrap after (for Markdown output)")
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		if fzf {
-			all, err := notes.Search(note.Query{})
+			all, err := notes.Search(note.Query{}, loadNote)
 			if err != nil {
 				exitErr("❗️ Failed to list: %v", err)
 			}
@@ -190,22 +191,31 @@ func cmdSearch(ctx context.Context) *cobra.Command {
 			}
 		}
 
-		notesList, err := notes.Search(q)
+		notesList, err := notes.Search(q, true)
 		if err != nil {
 			exitErr("❗️Search failed: %v", err)
 		}
 		if notesList == nil {
-			notesList = []string{}
+			notesList = []note.Note{}
 		}
 
 		writeOut(cmd, notesList, func(format string) string {
 			if len(notesList) == 0 {
 				return "❕ No notes matched the query."
 			}
+
 			res := strings.Builder{}
+			table := tablewriter.NewWriter(&res)
+			table.SetHeader([]string{"Name", "Tags", "Created On"})
 			for _, s := range notesList {
-				res.WriteString("‣ " + s + "\n")
+				tags := "-"
+				if len(s.Tags) > 0 {
+					tags = strings.Join(s.Tags, ", ")
+				}
+				table.Append([]string{s.Name, tags, s.CreatedAt.Format("2006-01-02")})
 			}
+			table.Render()
+
 			return strings.TrimSpace(res.String())
 		})
 	}
@@ -295,7 +305,7 @@ func cmdRemoveNote(ctx context.Context) *cobra.Command {
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			all, err := notes.Search(note.Query{})
+			all, err := notes.Search(note.Query{}, false)
 			if err != nil {
 				exitErr("❗️ Failed to list: %v", err)
 			}
