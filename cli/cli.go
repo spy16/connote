@@ -79,7 +79,10 @@ func externalEditor(d []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+		_ = os.Remove(f.Name())
+	}()
 
 	if _, err := f.Write(d); err != nil {
 		return nil, err
