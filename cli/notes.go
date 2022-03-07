@@ -163,7 +163,9 @@ func cmdSearch(ctx context.Context) *cobra.Command {
 
 	var q note.Query
 	var after, before string
+	var loadFull bool
 	flags := cmd.Flags()
+	flags.BoolVar(&loadFull, "full", false, "Load note from file instead of partial data from index")
 	flags.StringVarP(&after, "after", "a", "", "Created After")
 	flags.StringVarP(&before, "before", "b", "", "Created Before")
 	flags.StringSliceVarP(&q.IncludeTags, "include", "i", nil, "Include notes with this tag")
@@ -191,7 +193,7 @@ func cmdSearch(ctx context.Context) *cobra.Command {
 			}
 		}
 
-		notesList, err := notes.Search(q, true)
+		notesList, err := notes.Search(q, false)
 		if err != nil {
 			exitErr("❗️Search failed: %v", err)
 		}

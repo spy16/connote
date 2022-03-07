@@ -73,15 +73,17 @@ func (api *API) Search(q Query, loadNote bool) ([]Note, error) {
 			}
 			res = append(res, *n)
 		} else {
-			res = append(res, Note{Name: name})
+			res = append(res, Note{
+				Name:      name,
+				Tags:      setToArray(node.Tags),
+				CreatedAt: time.Unix(node.CreatedAt, 0),
+			})
 		}
 	}
 
-	if loadNote {
-		sort.Slice(res, func(i, j int) bool {
-			return res[i].CreatedAt.After(res[j].CreatedAt)
-		})
-	}
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].CreatedAt.After(res[j].CreatedAt)
+	})
 	return res, nil
 }
 
@@ -248,4 +250,12 @@ func (q Query) isMatch(node indexNode) bool {
 		before = time.Now().Unix()
 	}
 	return node.CreatedAt >= after && node.CreatedAt <= before
+}
+
+func setToArray(set map[string]struct{}) []string {
+	var arr []string
+	for v := range set {
+		arr = append(arr, v)
+	}
+	return arr
 }
