@@ -2,6 +2,13 @@
 
 connote is a simple console-based note taking tool.
 
+## Features
+
+* Simple markdown based notes.
+* All notes are stored as files in `$HOME/.connote/<profile>`.
+* Multiple profiles support for isolating notes.
+* All commands support `json`, `yaml`, `pretty` outputs. 
+
 ## Install
 
 * Download the binary for your operating system from [Releases](https://github.com/spy16/connote/releases)
@@ -11,13 +18,13 @@ connote is a simple console-based note taking tool.
 
 ```shell
 # write down anything specific to the day (e.g., work log)
-$ connote write
+$ connote edit
 
 # edit yesterday's note
-$ connote note @yday
+$ connote edit @yday
 
 # create a custom note with tags 
-$ connote note kafka -t tldr
+$ connote edit kafka -t tldr
 
 # show today's note
 $ connote show
@@ -28,10 +35,14 @@ $ connote show @-7
 # show note on kafka
 $ connote show kafka
 
-# list all notes
-$ connote list
+# list all notes (table view)
+$ connote ls
+
+# list all notes (yaml format)
+$ connote ls -o yaml
 
 # list all tldr type notes
-$ connote list -t tldr
+$ connote ls -i tldr
 ```
 
+*Tip*: Alias `connote` as `cn`.
