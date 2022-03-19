@@ -6,6 +6,7 @@ require (
 	github.com/charmbracelet/glamour v0.5.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -24,7 +25,6 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.17 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.11.0 // indirect
-	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/yuin/goldmark v1.4.4 // indirect

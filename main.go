@@ -4,17 +4,29 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
-	"github.com/spy16/connote/cli"
+	"github.com/mitchellh/go-homedir"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+
+	"github.com/spy16/connote/note"
 )
 
 var (
 	Commit    = "N/A"
 	Version   = "N/A"
 	BuildTime = "N/A"
+
+	rootCmd = &cobra.Command{
+		Use:               "connote <command> [flags]",
+		Short:             "📝 Console based note taking tool.",
+		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
+	}
 )
 
 func main() {
@@ -23,6 +35,50 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 
-	versionStr := fmt.Sprintf("Version %s (commit %s built on %s)", Version, Commit, BuildTime)
-	cli.Execute(ctx, versionStr)
+	setupCLI(ctx)
+
+	_ = rootCmd.Execute()
+}
+
+func setupCLI(ctx context.Context) {
+	var logLevel, profile string
+	flags := rootCmd.PersistentFlags()
+	flags.StringVarP(&profile, "profile", "p", "work", "Profile to load and use")
+	flags.StringVarP(&logLevel, "log-level", "l", "warn", "Log level to use")
+	flags.StringP("output", "o", "pretty", "Output format (json, yaml, markdown & pretty)")
+
+	rootCmd.Version = fmt.Sprintf("Version %s (commit %s built on %s)", Version, Commit, BuildTime)
+	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		lvl, err := logrus.ParseLevel(logLevel)
+		if err != nil {
+			return err
+		}
+		logrus.SetLevel(lvl)
+
+		home, err := homedir.Dir()
+		if err != nil {
+			return err
+		}
+		configDir := filepath.Join(home, ".connote")
+		if err := os.MkdirAll(configDir, os.ModePerm); err != nil {
+			return err
+		}
+		notesDir := filepath.Join(configDir, profile)
+
+		notes, err = note.Open(notesDir, nil)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// setup all commands
+	rootCmd.AddCommand(
+		cmdShowNote(),
+		cmdReindex(),
+		cmdEditNote(),
+		cmdSearch(),
+		cmdLoadNotes(),
+		cmdRemoveNote(),
+	)
 }

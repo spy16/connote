@@ -1,8 +1,7 @@
-package cli
+package main
 
 import (
 	"bufio"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -26,7 +25,7 @@ var (
 	notes *note.API
 )
 
-func cmdEditNote(ctx context.Context) *cobra.Command {
+func cmdEditNote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "write [name]",
 		Args:    cobra.MaximumNArgs(1),
@@ -78,7 +77,7 @@ func cmdEditNote(ctx context.Context) *cobra.Command {
 	return cmd
 }
 
-func cmdShowNote(ctx context.Context) *cobra.Command {
+func cmdShowNote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "show [id-or-name]",
 		Short:   "Show a note by name",
@@ -138,7 +137,7 @@ func cmdShowNote(ctx context.Context) *cobra.Command {
 	return cmd
 }
 
-func cmdReindex(ctx context.Context) *cobra.Command {
+func cmdReindex() *cobra.Command {
 	return &cobra.Command{
 		Use:     "reindex",
 		Short:   "Force re-index current profile directory",
@@ -153,7 +152,7 @@ func cmdReindex(ctx context.Context) *cobra.Command {
 	}
 }
 
-func cmdSearch(ctx context.Context) *cobra.Command {
+func cmdSearch() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "search <name-pattern>",
 		Args:    cobra.MaximumNArgs(1),
@@ -224,7 +223,7 @@ func cmdSearch(ctx context.Context) *cobra.Command {
 	return cmd
 }
 
-func cmdLoadNotes(ctx context.Context) *cobra.Command {
+func cmdLoadNotes() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "from <dir-or-file>",
 		Short:   "Load notes from markdown files in given directory or file",
@@ -294,7 +293,7 @@ func cmdLoadNotes(ctx context.Context) *cobra.Command {
 	return cmd
 }
 
-func cmdRemoveNote(ctx context.Context) *cobra.Command {
+func cmdRemoveNote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "rm <name>",
 		Short:   "Delete a note by name",
