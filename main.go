@@ -90,15 +90,17 @@ func cmdInfo() *cobra.Command {
 		Use:   "info",
 		Short: "Show statistics and profile information",
 		Run: func(cmd *cobra.Command, args []string) {
-			profile, count := notes.Stats()
+			profile, dir, count := notes.Stats()
 			m := map[string]interface{}{
-				"profile": profile,
-				"count":   count,
+				"count":     count,
+				"profile":   profile,
+				"directory": dir,
 			}
 			writeOut(cmd, m, func(_ string) string {
 				var s = "-------------------------------\n"
-				s += fmt.Sprintf("👤 Current Profile: %s\n", profile)
-				s += fmt.Sprintf("❕ Total Notes: %d\n", count)
+				s += fmt.Sprintf("👤 Profile  : %s\n", profile)
+				s += fmt.Sprintf("📂 Location : %s\n", dir)
+				s += fmt.Sprintf("❕ Notes    : %d\n", count)
 				s += "-------------------------------\n"
 				return strings.TrimSpace(s)
 			})

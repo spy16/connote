@@ -189,8 +189,8 @@ func (api *API) Index() error {
 }
 
 // Stats returns statistics of this note storage.
-func (api *API) Stats() (profile string, count int) {
-	return api.profile, len(api.idx)
+func (api *API) Stats() (profile, dir string, count int) {
+	return api.profile, api.dir, len(api.idx)
 }
 
 func (api *API) loadIdx() error {
