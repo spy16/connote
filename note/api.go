@@ -24,7 +24,7 @@ var (
 
 // Open returns a new API instance for given directory. If directory is not found
 // it will be created automatically.
-func Open(dir string, logFn LogFn) (*API, error) {
+func Open(profileName, dir string, logFn LogFn) (*API, error) {
 	if logFn == nil {
 		logFn = func(lvl, format string, args ...interface{}) {
 			lvl = strings.ToUpper(lvl)
@@ -35,15 +35,16 @@ func Open(dir string, logFn LogFn) (*API, error) {
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		return nil, err
 	}
-	api := &API{dir: dir, log: logFn}
+	api := &API{dir: dir, log: logFn, profile: profileName}
 	return api, api.loadIdx()
 }
 
 // API provides functions to manage notes in a given directory.
 type API struct {
-	dir string
-	log LogFn
-	idx map[string]indexNode
+	dir     string
+	log     LogFn
+	idx     map[string]indexNode
+	profile string
 }
 
 // Search finds names of all notes that match the given query.
@@ -185,6 +186,11 @@ func (api *API) Index() error {
 	}
 
 	return api.syncIdx()
+}
+
+// Stats returns statistics of this note storage.
+func (api *API) Stats() (profile string, count int) {
+	return api.profile, len(api.idx)
 }
 
 func (api *API) loadIdx() error {

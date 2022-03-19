@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -65,7 +66,7 @@ func setupCLI(ctx context.Context) {
 		}
 		notesDir := filepath.Join(configDir, profile)
 
-		notes, err = note.Open(notesDir, nil)
+		notes, err = note.Open(profile, notesDir, nil)
 		if err != nil {
 			return err
 		}
@@ -80,5 +81,27 @@ func setupCLI(ctx context.Context) {
 		cmdSearch(),
 		cmdLoadNotes(),
 		cmdRemoveNote(),
+		cmdInfo(),
 	)
+}
+
+func cmdInfo() *cobra.Command {
+	return &cobra.Command{
+		Use:   "info",
+		Short: "Show statistics and profile information",
+		Run: func(cmd *cobra.Command, args []string) {
+			profile, count := notes.Stats()
+			m := map[string]interface{}{
+				"profile": profile,
+				"count":   count,
+			}
+			writeOut(cmd, m, func(_ string) string {
+				var s = "-------------------------------\n"
+				s += fmt.Sprintf("👤 Current Profile: %s\n", profile)
+				s += fmt.Sprintf("❕ Total Notes: %d\n", count)
+				s += "-------------------------------\n"
+				return strings.TrimSpace(s)
+			})
+		},
+	}
 }
