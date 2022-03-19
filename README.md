@@ -6,6 +6,7 @@ connote is a simple console-based note taking tool.
 
 * Simple markdown based notes.
 * All notes are stored as files in `$HOME/.connote/<profile>`.
+* Front-matter is used for tags and other metadata.
 * Multiple profiles support for isolating notes.
 * All commands support `json`, `yaml`, `pretty` outputs. 
 
@@ -45,4 +46,4 @@ $ connote ls -o yaml
 $ connote ls -i tldr
 ```
 
-*Tip*: Alias `connote` as `cn`.
+*💡 Tip*: Alias `connote` as `cn` for easy access.
