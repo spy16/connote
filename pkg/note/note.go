@@ -53,8 +53,8 @@ func Parse(md []byte) (*Note, error) {
 // Note represents a snippet of information with additional metadata.
 type Note struct {
 	Name      string    `json:"name" yaml:"name"`
-	Tags      []string  `json:"tags" yaml:"tags,omitempty"`
-	Content   string    `json:"content" yaml:"content,omitempty"`
+	Tags      []string  `json:"tags,omitempty" yaml:"tags,omitempty"`
+	Content   string    `json:"content,omitempty" yaml:"content,omitempty"`
 	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" yaml:"updated_at"`
 }

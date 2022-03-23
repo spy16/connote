@@ -15,7 +15,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/spy16/connote/note"
+	"github.com/spy16/connote/pkg/config"
+	"github.com/spy16/connote/pkg/note"
 )
 
 var (
@@ -31,25 +32,29 @@ var (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	rand.Seed(time.Now().UnixNano())
-
-	setupCLI(ctx)
-
-	_ = rootCmd.Execute()
+	runCLI(ctx)
 }
 
-func setupCLI(ctx context.Context) {
+func runCLI(ctx context.Context) {
 	var logLevel, profile string
 	flags := rootCmd.PersistentFlags()
 	flags.StringVarP(&profile, "profile", "p", "work", "Profile to load and use")
 	flags.StringVarP(&logLevel, "log-level", "l", "warn", "Log level to use")
 	flags.StringP("output", "o", "pretty", "Output format (json, yaml, markdown & pretty)")
+	flags.StringP("config", "c", "", "override configuration file")
 
 	rootCmd.Version = fmt.Sprintf("Version %s (commit %s built on %s)", Version, Commit, BuildTime)
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		err := config.CobraPreRunHook("", "connote")(cmd, args)
+		if err != nil {
+			return err
+		}
+
 		lvl, err := logrus.ParseLevel(logLevel)
 		if err != nil {
 			return err
@@ -83,6 +88,8 @@ func setupCLI(ctx context.Context) {
 		cmdRemoveNote(),
 		cmdInfo(),
 	)
+
+	_ = rootCmd.Execute()
 }
 
 func cmdInfo() *cobra.Command {

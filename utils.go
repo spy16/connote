@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spy16/connote/note"
+	"github.com/spy16/connote/pkg/note"
 )
 
 func externalEditor(d []byte) ([]byte, error) {

@@ -18,12 +18,10 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 
-	"github.com/spy16/connote/note"
+	"github.com/spy16/connote/pkg/note"
 )
 
-var (
-	notes *note.API
-)
+var notes *note.API
 
 func cmdEditNote() *cobra.Command {
 	cmd := &cobra.Command{
