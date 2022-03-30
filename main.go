@@ -71,7 +71,7 @@ func runCLI(ctx context.Context) {
 		}
 		notesDir := filepath.Join(configDir, profile)
 
-		notes, err = note.Open(profile, notesDir, nil)
+		notes, err = note.Open(profile, notesDir, true, nil)
 		if err != nil {
 			return err
 		}

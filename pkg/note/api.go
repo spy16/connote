@@ -24,7 +24,7 @@ var (
 
 // Open returns a new API instance for given directory. If directory is not found
 // it will be created automatically.
-func Open(profileName, dir string, logFn LogFn) (*API, error) {
+func Open(profileName, dir string, init bool, logFn LogFn) (*API, error) {
 	if logFn == nil {
 		logFn = func(lvl, format string, args ...interface{}) {
 			lvl = strings.ToUpper(lvl)
@@ -32,10 +32,19 @@ func Open(profileName, dir string, logFn LogFn) (*API, error) {
 		}
 	}
 
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+	info, err := os.Stat(dir)
+	if err != nil && !os.IsNotExist(err) {
+		return nil, err
+	} else if os.IsNotExist(err) && !init {
+		return nil, fmt.Errorf("profile directory non-existent")
+	} else if !info.IsDir() {
+		return nil, fmt.Errorf("profile path is not a directory")
+	}
+
+	api := &API{dir: dir, log: logFn, profile: profileName}
+	if err := api.initDir(); err != nil {
 		return nil, err
 	}
-	api := &API{dir: dir, log: logFn, profile: profileName}
 	return api, api.loadIdx()
 }
 
@@ -218,6 +227,14 @@ func (api *API) syncIdx() error {
 		return err
 	}
 	return ioutil.WriteFile(idxPath, d, 0644)
+}
+
+func (api *API) initDir() error {
+	if err := os.MkdirAll(api.dir, os.ModePerm); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (api *API) getPath(name string) string {
