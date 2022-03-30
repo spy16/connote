@@ -80,6 +80,8 @@ func runCLI(ctx context.Context) {
 
 	// setup all commands
 	rootCmd.AddCommand(
+		cmdInitProfile(),
+
 		cmdShowNote(),
 		cmdReindex(),
 		cmdEditNote(),
@@ -90,6 +92,19 @@ func runCLI(ctx context.Context) {
 	)
 
 	_ = rootCmd.Execute()
+}
+
+func cmdInitProfile() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "init <name>",
+		Short:   "Initialise a profile",
+		Aliases: []string{"begin", "setup", "initialise"},
+	}
+
+	cmd.Run = func(cmd *cobra.Command, args []string) {
+
+	}
+	return cmd
 }
 
 func cmdInfo() *cobra.Command {
