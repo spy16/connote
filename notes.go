@@ -111,7 +111,10 @@ func cmdShowNote() *cobra.Command {
 			exitErr("❗️ %s", err)
 		}
 
-		mdFormat := func(_ string) string {
+		mdFormat := func(format string) string {
+			if format == "markdown" || format == "md" {
+				return string(nt.ToMarkdown())
+			}
 			sc := glamour.DefaultStyles[style]
 			if sc == nil {
 				sc = &glamour.DarkStyleConfig
