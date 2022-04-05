@@ -165,7 +165,7 @@ func cmdSearch() *cobra.Command {
 	flags.BoolVar(&loadFull, "full", false, "Load note from file instead of partial data from index")
 	flags.StringVarP(&after, "after", "a", "", "Created After")
 	flags.StringVarP(&before, "before", "b", "", "Created Before")
-	flags.StringSliceVarP(&q.IncludeTags, "include", "i", nil, "Include notes with this tag")
+	flags.StringSliceVarP(&q.IncludeTags, "include", "t", nil, "Include notes with this tag")
 	flags.StringSliceVarP(&q.ExcludeTags, "exclude", "e", nil, "Exclude notes with this tag")
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {

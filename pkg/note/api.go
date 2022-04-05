@@ -18,13 +18,23 @@ import (
 const idxName = "notes_idx.json"
 
 var (
+	namePattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9-_]+$`)
+
 	ErrNotFound = errors.New("not found")
 	ErrConflict = errors.New("conflict")
 )
 
 // Open returns a new API instance for given directory. If directory is not found
 // it will be created automatically.
-func Open(profileName, dir string, init bool, logFn LogFn) (*API, error) {
+func Open(profileName, dir, gitRemote string, logFn LogFn) (*API, error) {
+	dir = strings.TrimSpace(dir)
+	gitRemote = strings.TrimSpace(gitRemote)
+	profileName = strings.TrimSpace(profileName)
+
+	if !namePattern.MatchString(profileName) {
+		return nil, fmt.Errorf("invalid profile name, must match '%s'", namePattern)
+	}
+
 	if logFn == nil {
 		logFn = func(lvl, format string, args ...interface{}) {
 			lvl = strings.ToUpper(lvl)
@@ -35,14 +45,14 @@ func Open(profileName, dir string, init bool, logFn LogFn) (*API, error) {
 	info, err := os.Stat(dir)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, err
-	} else if os.IsNotExist(err) && !init {
+	} else if os.IsNotExist(err) && gitRemote == "" {
 		return nil, fmt.Errorf("profile directory non-existent")
-	} else if !info.IsDir() {
+	} else if info != nil && !info.IsDir() {
 		return nil, fmt.Errorf("profile path is not a directory")
 	}
 
 	api := &API{dir: dir, log: logFn, profile: profileName}
-	if err := api.initDir(); err != nil {
+	if err := api.initDir(gitRemote); err != nil {
 		return nil, err
 	}
 	return api, api.loadIdx()
@@ -229,11 +239,16 @@ func (api *API) syncIdx() error {
 	return ioutil.WriteFile(idxPath, d, 0644)
 }
 
-func (api *API) initDir() error {
+func (api *API) initDir(gitRemote string) error {
 	if err := os.MkdirAll(api.dir, os.ModePerm); err != nil {
 		return err
 	}
 
+	if gitRemote != "" {
+		if err := gitClone(api.dir, gitRemote); err != nil && !errors.Is(err, errEmptyClone) {
+			return err
+		}
+	}
 	return nil
 }
 
