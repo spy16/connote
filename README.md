@@ -47,3 +47,4 @@ $ connote ls -i tldr
 ```
 
 *💡 Tip*: Alias `connote` as `cn` for easy access.
+* 📌 Note: Connote uses the editor command set through `EDITOR` environment variable (The editor must be blocking, like Vim).
