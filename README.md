@@ -1,5 +1,7 @@
 # 📝 connote
 
+![Build](https://github.com/spy16/connote/actions/workflows/tag_created.yml/badge.svg)
+
 connote is a simple console-based note taking tool.
 
 ## Features
@@ -13,7 +15,7 @@ connote is a simple console-based note taking tool.
 ## Install
 
 * Download the binary for your operating system from [Releases](https://github.com/spy16/connote/releases)
-* Run `go install github.com/spy16/connote` to directly build and install.
+* OR, Run `go install github.com/spy16/connote` to directly build and install.
 
 ## Usage
 
