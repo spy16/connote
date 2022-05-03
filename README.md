@@ -1,6 +1,6 @@
 # 📝 connote
 
-![Build](https://github.com/spy16/connote/actions/workflows/tag_created.yml/badge.svg)
+![Build](https://github.com/spy16/connote/actions/workflows/tag_created.yml/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/spy16/connote)](https://goreportcard.com/report/github.com/spy16/connote)
 
 connote is a simple console-based note taking tool.
 
